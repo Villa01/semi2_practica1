@@ -1,6 +1,6 @@
 import pymysql
-
 import os
+from creation import DROP_TABLES, tables_to_create
 
 mysql_config = {
     'HOST': os.environ.get('HOST'),
@@ -23,6 +23,23 @@ def get_connection():
 
     except Exception as err:
         print(f'Could not connect to database: {err}')
-    else:
-        my_conn.close()
     return my_conn
+
+
+def drop_all_tables(db_conn):
+    cursor = db_conn.cursor()
+    cursor.execute(DROP_TABLES)
+
+
+def create_tables(db_conn):
+    query = ''
+    for table in tables_to_create:
+        query += table
+    try:
+        cursor = db_conn.cursor()
+        cursor.execute(query)
+    except Exception as e:
+        print(f'Could not connect to database: {e}')
+    else:
+        cursor.close()
+
