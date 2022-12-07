@@ -19,7 +19,7 @@ def get_connection():
             password=mysql_config['PASS'],
             database=mysql_config['DATABASE']
         )
-        print('MySQL connected succesfully')
+        my_conn.mysql_config = mysql_config
 
     except Exception as err:
         print(f'Could not connect to database: {err}')

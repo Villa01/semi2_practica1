@@ -13,7 +13,7 @@ def configure_logging():
     return logger
 
 
-class CliController:
+class ActionController:
 
     def __init__(self, logs=True, silent=False):
         self.silent = silent
@@ -23,15 +23,16 @@ class CliController:
 
         self.display_menu()
 
-    def create_log(self, message, internal=False):
-        if self.logs:
+    def print_handler(self, message, internal=False, logs=True):
+        if self.logs and logs:
             self.logger.info(message)
 
-        if not self.silent or internal:
+        if not (self.silent or internal):
             print(message)
 
     def display_menu(self):
-        self.create_log("Setting things up")
+        self.print_handler("Setting things up")
         conn = get_connection()
-        conn.
-        self.create_log(f'Database server information: {conn.get_server_info()}', internal=True)
+
+        self.print_handler(f'Database server information: {conn.mysql_config}', internal=True)
+
