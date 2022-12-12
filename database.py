@@ -43,3 +43,34 @@ def create_tables(db_conn):
     else:
         cursor.close()
 
+
+def fill_temporal(db_conn, values):
+    query = """
+    INSERT INTO `practica1`.`temporal`
+    (`artist`,
+    `song`,
+    `duration_ms`,
+    `explicit`,
+    `year`,
+    `popularity`,
+    `danceability`,
+    `energy`,
+    `llave`,
+    `loudness`,
+    `mode`,
+    `speechiness`,
+    `acousticness`,
+    `instrumentalness`,
+    `liveness`,
+    `valence`,
+    `tempo`,
+    `genre`)
+    VALUES
+    """
+    sql_values = []
+    for value in values:
+        query += """(%s,%s,%i,%r,%i,%f,%f,%f, %i,%f,%f,%f,%f,%f,%f,%f,%f,%s)"""
+        sql_values.append(value)
+
+    print(query)
+    print(sql_values)

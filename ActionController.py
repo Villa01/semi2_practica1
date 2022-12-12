@@ -1,5 +1,7 @@
 import logging
-from database import get_connection, drop_all_tables, create_tables
+
+from dataProcessing import temporal_data_process
+from database import get_connection, drop_all_tables, create_tables, fill_temporal
 
 
 class ActionController:
@@ -35,12 +37,27 @@ class ActionController:
         self.print_handler(f'Database server information: {conn.mysql_config}', internal=True)
         return conn
 
-    def create(self):
+    def create(self, file_path):
+        file = None
+        try:
+            file = open(file_path, 'r')
+        except FileNotFoundError:
+            raise Exception('File provided not found')
+
         self.conn = self.set_up_connection()
         self.print_handler('Starting process')
+
         self.print_handler('Deleting tables')
         drop_all_tables(self.conn)
         self.print_handler('Tables deleted')
+
         self.print_handler('Creating tables')
         create_tables(self.conn)
+        self.print_handler('Tables created')
+
+        self.print_handler('Loading dataset')
+        temporal_data_process(file)
+        self.print_handler('Dataset loaded')
+
+
 
