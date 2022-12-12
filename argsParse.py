@@ -9,3 +9,4 @@ parser.add_argument('-l', '--logs',
                     help='Allows to write logs in a file provided',
                     default='./logs.log',
                     required=False)
+parser.add_argument('-f', '--file', help='CSV file provided to process', default='./data.csv', required=False)

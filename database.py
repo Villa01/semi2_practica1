@@ -45,7 +45,7 @@ def create_tables(db_conn):
 
 
 def fill_temporal(db_conn, values):
-    query = """
+    original_query = """
     INSERT INTO `practica1`.`temporal`
     (`artist`,
     `song`,
@@ -67,10 +67,35 @@ def fill_temporal(db_conn, values):
     `genre`)
     VALUES
     """
-    sql_values = []
+    batch_size = 50
+    batch_count = 1
+    sql_values = ()
+    i = 0
+    query = original_query
+    errors = 0
     for value in values:
-        query += """(%s,%s,%i,%r,%i,%f,%f,%f, %i,%f,%f,%f,%f,%f,%f,%f,%f,%s)"""
-        sql_values.append(value)
+        if i == batch_size:
+            batch_count += 1
+            query = query[:-2] + ';'
+            try:
+                cursor = db_conn.cursor()
+                cursor.execute(query % sql_values)
+            except Exception as e:
+                errors += 1
+                print(query % sql_values)
+                print(f'Could not load data into Temporal table: {e}')
+            else:
+                cursor.close()
+            query = original_query
+            sql_values = ()
+            i = 0
 
-    print(query)
-    print(sql_values)
+        query += """('%s','%s',%i,%r,%i,%f,%f,%f,%i,%f,%f,%f,%f,%f,%f,%f,%f,'%s'),\n"""
+        sql_values += (value.artist, value.song, value.duration_ms, value.explicit, value.year, value.popularity,
+                       value.danceability, value.energy, value.key, value.loudness, value.mode, value.speechiness,
+                       value.acousticness, value.instrumentalness, value.liveness, value.valence, value.tempo,
+                       value.genre)
+        i += 1
+
+    db_conn.commit()
+    return f'Inserted {batch_count} batches, error #: {errors}'

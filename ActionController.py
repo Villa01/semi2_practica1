@@ -38,7 +38,6 @@ class ActionController:
         return conn
 
     def create(self, file_path):
-        file = None
         try:
             file = open(file_path, 'r')
         except FileNotFoundError:
@@ -56,8 +55,12 @@ class ActionController:
         self.print_handler('Tables created')
 
         self.print_handler('Loading dataset')
-        temporal_data_process(file)
+        df = temporal_data_process(file)
         self.print_handler('Dataset loaded')
 
+        self.print_handler('Loading dataset to Temporal')
+        result = fill_temporal(self.conn, df.itertuples())
+        self.print_handler(result)
+        self.print_handler('Dataset loaded to Temporal')
 
 
