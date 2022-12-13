@@ -1,16 +1,16 @@
 
 CREATE TABLE IF NOT EXISTS practica1.Artist (
-  idArtist INT NOT NULL,
+  idArtist INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) NULL,
   PRIMARY KEY (idArtist));
 
 CREATE TABLE IF NOT EXISTS practica1.Genre (
-  idGenre INT NOT NULL,
+  idGenre INT NOT NULL AUTO_INCREMENT,
   name VARCHAR(50) NULL,
   PRIMARY KEY (idGenre));
 
 CREATE TABLE IF NOT EXISTS practica1.Song (
-  idSong INT NOT NULL,
+  idSong INT NOT NULL AUTO_INCREMENT,
   energy DECIMAL(10,4) NULL,
   name VARCHAR(200) NOT NULL,
   durationMs INT NULL,

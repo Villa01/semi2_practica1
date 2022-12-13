@@ -27,7 +27,7 @@ def main():
     elif args.action == 'query':
         exit('Not yet implemented')
     elif args.action == 'exit':
-        exit('Not yet implemented')
+        ac.exit()
     else:
         exit('Action not supported')
 

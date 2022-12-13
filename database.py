@@ -1,6 +1,6 @@
 import pymysql
 import os
-from creation import DROP_TABLES, CREATE_TABLES
+from queries import DROP_TABLES, CREATE_TABLES, INSERT_DATA
 
 mysql_config = {
     'HOST': os.environ.get('HOST'),
@@ -44,6 +44,7 @@ def execute_queries(db_conn, queries):
         result = execute_query(db_conn, q)
         if not result:
             errors.append(result)
+    db_conn.commit()
     return errors
 
 
@@ -57,6 +58,12 @@ def execute_query(db_conn, query):
         cursor.close()
 
     return True
+
+
+def fill_er(db_conn):
+    queries = INSERT_DATA.split(';')
+    errors = execute_queries(db_conn, queries)
+    return queries, errors
 
 
 def fill_temporal(db_conn, values):
@@ -83,7 +90,7 @@ def fill_temporal(db_conn, values):
     `genre`)
     VALUES
     """
-    batch_size = 50
+    batch_size = 2
     batch_count = 1
     sql_values = ()
     count = 0
@@ -95,15 +102,9 @@ def fill_temporal(db_conn, values):
             batch_count += 1
             query = query[:-2] + ';'
             count += len(sql_values)
-            try:
-                cursor = db_conn.cursor()
-                cursor.execute(query % sql_values)
-            except Exception as e:
-                errors += 1
-                print(query % sql_values)
-                print(f'Could not load data into Temporal table: {e}')
-            else:
-                cursor.close()
+            queries = (query % sql_values).split(';')
+            err = execute_queries(db_conn, queries)
+            errors += len(err)
             query = original_query
             sql_values = ()
             i = 0

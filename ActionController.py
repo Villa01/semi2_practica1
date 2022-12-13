@@ -1,7 +1,7 @@
 import logging
 
 from dataProcessing import temporal_data_process
-from database import get_connection, drop_all_tables, create_tables, fill_temporal
+from database import get_connection, drop_all_tables, create_tables, fill_temporal, fill_er
 
 
 class ActionController:
@@ -10,7 +10,6 @@ class ActionController:
         self.conn = None
         self.logs = logs
         self.silent = silent
-        print(f'Logs {logs}')
         if self.logs:
             self.logger = self.configure_logging()
 
@@ -61,6 +60,7 @@ class ActionController:
         for e in errors:
             self.print_handler(f'Errors in queries: {e}')
         self.print_handler('Tables created')
+        self.conn.close()
 
     def load(self, file_path):
         try:
@@ -75,3 +75,23 @@ class ActionController:
         result = fill_temporal(self.conn, df.itertuples())
         self.print_handler(result)
         self.print_handler('Dataset loaded to Temporal')
+
+        self.print_handler('Loading dataset to relational model')
+        queries, errors = fill_er(self.conn)
+        for q in queries:
+            self.print_handler(f'Query performed: {q}')
+
+        for e in errors:
+            self.print_handler(f'Errors in queries: {e}')
+        self.print_handler('Dataset loaded to relational model')
+
+        self.conn.close()
+
+    def query(self):
+        self.print_handler('Querying')
+        self.conn.close()
+
+    def exit(self):
+        self.print_handler('Program exited succesfully.')
+        self.print_handler(f'You can access logs in {self.logs}')
+        self.conn.close()
