@@ -1,6 +1,6 @@
 import pymysql
 import os
-from creation import DROP_TABLES, tables_to_create
+from creation import DROP_TABLES, CREATE_TABLES
 
 mysql_config = {
     'HOST': os.environ.get('HOST'),
@@ -27,25 +27,41 @@ def get_connection():
 
 
 def drop_all_tables(db_conn):
-    cursor = db_conn.cursor()
-    cursor.execute(DROP_TABLES)
+    queries = DROP_TABLES.split(';')
+    errors = execute_queries(db_conn, queries)
+    return queries, errors
 
 
 def create_tables(db_conn):
-    query = ''
-    for table in tables_to_create:
-        query += table
+    queries = CREATE_TABLES.split(';')
+    errors = execute_queries(db_conn, queries)
+    return queries, errors
+
+
+def execute_queries(db_conn, queries):
+    errors = []
+    for q in queries:
+        result = execute_query(db_conn, q)
+        if not result:
+            errors.append(result)
+    return errors
+
+
+def execute_query(db_conn, query):
     try:
         cursor = db_conn.cursor()
         cursor.execute(query)
     except Exception as e:
-        print(f'Could not connect to database: {e}')
+        return f'Could not perform {query}\n{e}'
     else:
         cursor.close()
+
+    return True
 
 
 def fill_temporal(db_conn, values):
     original_query = """
+    USE `practica1`;
     INSERT INTO `practica1`.`temporal`
     (`artist`,
     `song`,
@@ -70,6 +86,7 @@ def fill_temporal(db_conn, values):
     batch_size = 50
     batch_count = 1
     sql_values = ()
+    count = 0
     i = 0
     query = original_query
     errors = 0
@@ -77,6 +94,7 @@ def fill_temporal(db_conn, values):
         if i == batch_size:
             batch_count += 1
             query = query[:-2] + ';'
+            count += len(sql_values)
             try:
                 cursor = db_conn.cursor()
                 cursor.execute(query % sql_values)
@@ -98,4 +116,4 @@ def fill_temporal(db_conn, values):
         i += 1
 
     db_conn.commit()
-    return f'Inserted {batch_count} batches, error #: {errors}'
+    return f'Inserted {count} registries in {batch_count} batches, error #: {errors}'

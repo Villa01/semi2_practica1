@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 # Set up env variables
 load_dotenv()
 
@@ -17,13 +18,18 @@ def main():
         file_path = args.file
         if file_path is None:
             raise Exception('You need to provide a CSV file to create')
-        ac.create(file_path)
+        ac.create()
     elif args.action == 'load':
-        exit('Not yet implemented')
+        file_path = args.file
+        if file_path is None:
+            raise Exception('You need to provide a CSV file to create')
+        ac.load(file_path)
     elif args.action == 'query':
         exit('Not yet implemented')
     elif args.action == 'exit':
         exit('Not yet implemented')
+    else:
+        exit('Action not supported')
 
 
 if __name__ == '__main__':

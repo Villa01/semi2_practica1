@@ -14,6 +14,8 @@ class ActionController:
         if self.logs:
             self.logger = self.configure_logging()
 
+        self.conn = self.set_up_connection()
+
     def print_handler(self, message, internal=False, logs=True):
         if self.logs and logs:
             self.logger.info(message)
@@ -37,23 +39,34 @@ class ActionController:
         self.print_handler(f'Database server information: {conn.mysql_config}', internal=True)
         return conn
 
-    def create(self, file_path):
+    def create(self):
+
+        self.print_handler('Starting process')
+
+        self.print_handler('Deleting tables')
+        queries, errors = drop_all_tables(self.conn)
+        for q in queries:
+            self.print_handler(f'Query performed: {q}')
+
+        for e in errors:
+            self.print_handler(f'Errors in queries: {e}')
+
+        self.print_handler('Tables deleted')
+
+        self.print_handler('Creating tables')
+        queries, errors = create_tables(self.conn)
+        for q in queries:
+            self.print_handler(f'Query performed: {q}')
+
+        for e in errors:
+            self.print_handler(f'Errors in queries: {e}')
+        self.print_handler('Tables created')
+
+    def load(self, file_path):
         try:
             file = open(file_path, 'r')
         except FileNotFoundError:
             raise Exception('File provided not found')
-
-        self.conn = self.set_up_connection()
-        self.print_handler('Starting process')
-
-        self.print_handler('Deleting tables')
-        drop_all_tables(self.conn)
-        self.print_handler('Tables deleted')
-
-        self.print_handler('Creating tables')
-        create_tables(self.conn)
-        self.print_handler('Tables created')
-
         self.print_handler('Loading dataset')
         df = temporal_data_process(file)
         self.print_handler('Dataset loaded')
@@ -62,5 +75,3 @@ class ActionController:
         result = fill_temporal(self.conn, df.itertuples())
         self.print_handler(result)
         self.print_handler('Dataset loaded to Temporal')
-
-
