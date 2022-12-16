@@ -6,3 +6,6 @@ DROP_TABLES = deletion_file.read()
 
 insertion_file = open('./SQL/Insert.sql', 'r')
 INSERT_DATA = insertion_file.read()
+
+queris_file = open('./SQL/Queries.sql', 'r')
+QUERY_DATA = queris_file.read()

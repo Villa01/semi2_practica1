@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS practica1.Song (
   name VARCHAR(200) NOT NULL,
   durationMs INT NULL,
   year INT NULL,
+  explicit tinyint DEFAULT NULL,
   popularity DECIMAL(10,4) NULL,
   danceability DECIMAL(10,4) NULL,
   llave INT NULL,

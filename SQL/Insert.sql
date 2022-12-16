@@ -18,6 +18,7 @@ INSERT INTO `practica1`.`song`
 `liveness`,
 `valence`,
 `tempo`,
+`explicit`,
 `Artist_idArtist`,
 `Genre_idGenre`)
 SELECT
@@ -36,6 +37,7 @@ SELECT
     t.liveness,
     t.valence,
     t.tempo,
+    t.explicit,
 	a.idArtist,
     g.idGenre
 FROM practica1.temporal t

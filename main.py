@@ -13,7 +13,7 @@ def main():
     if args.logs is not None:
         logs_file = args.logs
 
-    ac = ActionController(logs=logs_file)
+    ac = ActionController(logs=logs_file, silent=args.silent)
     if args.action == 'create':
         file_path = args.file
         if file_path is None:
@@ -25,7 +25,7 @@ def main():
             raise Exception('You need to provide a CSV file to create')
         ac.load(file_path)
     elif args.action == 'query':
-        exit('Not yet implemented')
+        ac.query()
     elif args.action == 'exit':
         ac.exit()
     else:

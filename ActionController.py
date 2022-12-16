@@ -1,7 +1,7 @@
 import logging
 
 from dataProcessing import temporal_data_process
-from database import get_connection, drop_all_tables, create_tables, fill_temporal, fill_er
+from database import get_connection, drop_all_tables, create_tables, fill_temporal, fill_er, query_er
 
 
 class ActionController:
@@ -79,16 +79,21 @@ class ActionController:
         self.print_handler('Loading dataset to relational model')
         queries, errors = fill_er(self.conn)
         for q in queries:
-            self.print_handler(f'Query performed: {q}')
+            self.print_handler(f'Query performed: {q}', internal=True)
 
         for e in errors:
-            self.print_handler(f'Errors in queries: {e}')
+            self.print_handler(f'Errors in queries: {e}', internal=True)
         self.print_handler('Dataset loaded to relational model')
 
         self.conn.close()
 
     def query(self):
-        self.print_handler('Querying')
+        errors, results, queries = query_er(self.conn)
+        for q in queries:
+            self.print_handler(f'Query performed: {q}')
+        for e in errors:
+            self.print_handler(f'Errors in queries: {e}')
+        print('Results: ', results)
         self.conn.close()
 
     def exit(self):

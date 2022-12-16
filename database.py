@@ -1,6 +1,6 @@
 import pymysql
 import os
-from queries import DROP_TABLES, CREATE_TABLES, INSERT_DATA
+from queries import DROP_TABLES, CREATE_TABLES, INSERT_DATA, QUERY_DATA
 
 mysql_config = {
     'HOST': os.environ.get('HOST'),
@@ -38,26 +38,38 @@ def create_tables(db_conn):
     return queries, errors
 
 
-def execute_queries(db_conn, queries):
+def query_er(db_conn):
+    queries = QUERY_DATA.split(';')[:-1]
+    errors, results = execute_queries(db_conn, queries, True)
+    return errors, results, queries
+
+
+def execute_queries(db_conn, queries, fetch=None):
     errors = []
+    results = []
     for q in queries:
-        result = execute_query(db_conn, q)
-        if not result:
+        error, result = execute_query(db_conn, q, fetch)
+        if error:
             errors.append(result)
+            continue
+        results.append(result)
     db_conn.commit()
-    return errors
+    return errors, results
 
 
-def execute_query(db_conn, query):
+def execute_query(db_conn, query, fetch=False):
     try:
         cursor = db_conn.cursor()
-        cursor.execute(query)
+        if fetch:
+            result = cursor.fetchall()
+        else:
+            result = cursor.execute(query)
     except Exception as e:
-        return f'Could not perform {query}\n{e}'
+        return True, f'Could not perform {query}\n{e}'
     else:
         cursor.close()
 
-    return True
+    return False, result
 
 
 def fill_er(db_conn):
@@ -90,20 +102,23 @@ def fill_temporal(db_conn, values):
     `genre`)
     VALUES
     """
-    batch_size = 2
-    batch_count = 1
+    batch_size = 500
+    batch_count = 0
     sql_values = ()
     count = 0
     i = 0
     query = original_query
     errors = 0
-    for value in values:
-        if i == batch_size:
-            batch_count += 1
+    values_list = list(values)
+    max_length = len(values_list)
+    for value in values_list:
+        i += 1
+        if i >= batch_size or count + i >= max_length - 1:
             query = query[:-2] + ';'
-            count += len(sql_values)
-            queries = (query % sql_values).split(';')
-            err = execute_queries(db_conn, queries)
+            queries = (query % sql_values).split(';')[:-1]
+            err, queries = execute_queries(db_conn, queries)
+            count += i
+            batch_count += 1
             errors += len(err)
             query = original_query
             sql_values = ()
@@ -114,7 +129,6 @@ def fill_temporal(db_conn, values):
                        value.danceability, value.energy, value.key, value.loudness, value.mode, value.speechiness,
                        value.acousticness, value.instrumentalness, value.liveness, value.valence, value.tempo,
                        value.genre)
-        i += 1
 
     db_conn.commit()
     return f'Inserted {count} registries in {batch_count} batches, error #: {errors}'
