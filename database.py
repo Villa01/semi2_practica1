@@ -23,6 +23,7 @@ def get_connection():
 
     except Exception as err:
         print(f'Could not connect to database: {err}')
+
     return my_conn
 
 
@@ -61,7 +62,9 @@ def execute_query(db_conn, query, fetch=False):
     try:
         cursor = db_conn.cursor()
         if fetch:
+            cursor.execute(query)
             result = cursor.fetchall()
+            print(cursor.description)
         else:
             result = cursor.execute(query)
     except Exception as e:

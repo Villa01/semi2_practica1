@@ -1,4 +1,5 @@
 import logging
+from prettytable import PrettyTable
 
 from dataProcessing import temporal_data_process
 from database import get_connection, drop_all_tables, create_tables, fill_temporal, fill_er, query_er
@@ -89,11 +90,24 @@ class ActionController:
 
     def query(self):
         errors, results, queries = query_er(self.conn)
-        for q in queries:
-            self.print_handler(f'Query performed: {q}')
-        for e in errors:
-            self.print_handler(f'Errors in queries: {e}')
-        print('Results: ', results)
+        titles = ['1. ',
+                  '2. ',
+                  '3. ',
+                  '4. Canción más reproducida de cada género',
+                  '5. Artista más reproducido de cada género',
+                  '6. Canción más reproducida de cada año',
+                  '7. TOP 10 artistas más populares',
+                  '8. TOP 10 canciones más populares',
+                  '9. TOP 5 géneros más populares',
+                  '10. Canción explicita más reproducida de cada año'
+        ]
+        for i in range(len(queries)):
+            print(titles[i])
+            print(results[i])
+            x = PrettyTable()
+            for r in results[i]:
+                x.add_row(r)
+            print(x)
         self.conn.close()
 
     def exit(self):
